@@ -25,15 +25,6 @@ namespace DNS_over_HTTPS.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("1.1.1.1:53")]
-        public string DnsServer {
-            get {
-                return ((string)(this["DnsServer"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("TCP")]
         public string DnsServerProtocol {
             get {
@@ -47,6 +38,15 @@ namespace DNS_over_HTTPS.Properties {
         public int DnsTimeout {
             get {
                 return ((int)(this["DnsTimeout"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("127.0.0.1:53")]
+        public string DnsServer {
+            get {
+                return ((string)(this["DnsServer"]));
             }
         }
     }

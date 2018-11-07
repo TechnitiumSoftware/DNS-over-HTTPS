@@ -2,14 +2,14 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="DNS_over_HTTPS.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="DnsServer" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">1.1.1.1:53</Value>
-    </Setting>
     <Setting Name="DnsServerProtocol" Type="System.String" Scope="Application">
       <Value Profile="(Default)">TCP</Value>
     </Setting>
     <Setting Name="DnsTimeout" Type="System.Int32" Scope="Application">
       <Value Profile="(Default)">2000</Value>
+    </Setting>
+    <Setting Name="DnsServer" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">127.0.0.1:53</Value>
     </Setting>
   </Settings>
 </SettingsFile>
