@@ -2,6 +2,12 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
+    <Authors>Shreyas Zare</Authors>
+    <Company>Technitium</Company>
+    <Description>An implementation of RFC 8484 - DNS Queries over HTTPS (DoH).</Description>
+    <RepositoryUrl>https://github.com/TechnitiumSoftware/DNS-over-HTTPS</RepositoryUrl>
+    <PackageLicenseUrl>https://github.com/TechnitiumSoftware/DNS-over-HTTPS/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/TechnitiumSoftware/DNS-over-HTTPS</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup>

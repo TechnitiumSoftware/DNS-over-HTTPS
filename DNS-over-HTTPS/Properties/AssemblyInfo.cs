@@ -6,9 +6,9 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("DNS_over_HTTPS")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("An implementation of RFC 8484 - DNS Queries over HTTPS (DoH).")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Technitium")]
 [assembly: AssemblyProduct("DNS_over_HTTPS")]
 [assembly: AssemblyCopyright("Copyright ©  2018")]
 [assembly: AssemblyTrademark("")]
