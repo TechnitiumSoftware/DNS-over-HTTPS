@@ -22,15 +22,16 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using System;
+using System.IO;
 using System.Net;
-using System.Net.Sockets;
-using TechnitiumLibrary.IO;
+using TechnitiumLibrary.Net.Dns;
+using TechnitiumLibrary.Net.Dns.ClientConnection;
 
 namespace DNS_over_HTTPS.NETCore
 {
     public class Startup
     {
-        static IPEndPoint _dnsServerEndPoint;
+        static NameServerAddress _dnsServer;
 
         public IConfiguration Configuration { get; set; }
 
@@ -38,21 +39,7 @@ namespace DNS_over_HTTPS.NETCore
         {
             Configuration = configuration;
 
-            string[] parts = Configuration.GetValue<string>("DnsServer").Split(':');
-            string host = parts[0];
-            int port;
-
-            if (parts.Length > 1)
-                port = int.Parse(parts[1]);
-            else
-                port = 53;
-
-            IPAddress address;
-
-            if (!IPAddress.TryParse(host, out address))
-                address = Dns.GetHostAddresses(host)[0];
-
-            _dnsServerEndPoint = new IPEndPoint(address, port);
+            _dnsServer = new NameServerAddress(Configuration.GetValue<string>("DnsServer"));
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
@@ -70,83 +57,56 @@ namespace DNS_over_HTTPS.NETCore
                 if (Request.Path == "/dns-query")
                 {
                     string acceptTypes = Request.Headers["accept"];
-
                     if ((acceptTypes != null) && !acceptTypes.Contains("application/dns-message"))
                         throw new NotSupportedException("DoH request type not supported.");
 
-                    byte[] dnsRequest;
-
-                    switch (Request.Method)
+                    try
                     {
-                        case "GET":
-                            dnsRequest = Convert.FromBase64String(Request.Query["dns"]);
-                            break;
+                        DnsDatagram dnsRequest;
 
-                        case "POST":
-                            if (Request.ContentType != "application/dns-message")
-                                throw new NotSupportedException("DNS request type not supported: " + Request.ContentType);
+                        switch (Request.Method)
+                        {
+                            case "GET":
+                                dnsRequest = new DnsDatagram(new MemoryStream(Convert.FromBase64String(Request.Query["dns"])));
+                                break;
 
-                            dnsRequest = Request.Body.ReadBytes(Convert.ToInt32(Request.ContentLength));
-                            break;
+                            case "POST":
+                                if (Request.ContentType != "application/dns-message")
+                                    throw new NotSupportedException("DNS request type not supported: " + Request.ContentType);
 
-                        default:
-                            throw new NotSupportedException("DoH request type not supported."); ;
-                    }
+                                dnsRequest = new DnsDatagram(Request.Body);
+                                break;
 
-                    string protocol = Configuration.GetValue<string>("DnsServerProtocol");
+                            default:
+                                throw new NotSupportedException("DoH request type not supported."); ;
+                        }
 
-                    switch (protocol.ToLower())
-                    {
-                        case "tcp":
-                            using (Socket socket = new Socket(_dnsServerEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp))
+                        DnsClientConnection connection = DnsClientConnection.GetConnection((DnsClientProtocol)Enum.Parse(typeof(DnsClientProtocol), Configuration.GetValue<string>("DnsServerProtocol"), true), _dnsServer, null);
+                        connection.Timeout = Configuration.GetValue<int>("DnsTimeout");
+
+                        DnsDatagram response = connection.Query(dnsRequest);
+                        if (response == null)
+                        {
+                            Response.StatusCode = (int)HttpStatusCode.GatewayTimeout;
+                            await Response.WriteAsync("<p>DNS query timed out.</p>");
+                        }
+                        else
+                        {
+                            Response.ContentType = "application/dns-message";
+
+                            using (MemoryStream mS = new MemoryStream())
                             {
-                                try
-                                {
-                                    int timeout = Configuration.GetValue<int>("DnsTimeout");
-
-                                    socket.SendTimeout = timeout;
-                                    socket.ReceiveTimeout = timeout;
-
-                                    IAsyncResult result = socket.BeginConnect(_dnsServerEndPoint, null, null);
-                                    if (!result.AsyncWaitHandle.WaitOne(timeout))
-                                        throw new SocketException((int)SocketError.TimedOut);
-
-                                    if (!socket.Connected)
-                                        throw new SocketException((int)SocketError.ConnectionRefused);
-
-                                    NetworkStream stream = new NetworkStream(socket);
-
-                                    //send request
-                                    {
-                                        byte[] lengthBuffer = BitConverter.GetBytes(Convert.ToUInt16(dnsRequest.Length));
-                                        Array.Reverse(lengthBuffer);
-
-                                        stream.Write(lengthBuffer);
-                                        stream.Write(dnsRequest);
-                                    }
-
-                                    //read response
-                                    {
-                                        byte[] lengthBuffer = stream.ReadBytes(2);
-                                        Array.Reverse(lengthBuffer, 0, 2);
-                                        int length = BitConverter.ToUInt16(lengthBuffer, 0);
-
-                                        Response.ContentType = "application/dns-message";
-                                        stream.CopyTo(Response.Body, 128, length);
-                                    }
-                                }
-                                catch (Exception ex)
-                                {
-                                    Response.Clear();
-                                    Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                                    await Response.WriteAsync("<h1>500 Internal Server Error</h1>");
-                                    await Response.WriteAsync("<p>" + ex.ToString() + "</p>");
-                                }
+                                response.WriteTo(mS);
+                                mS.WriteTo(Response.Body);
                             }
-                            break;
-
-                        default:
-                            throw new NotSupportedException("DNS forwarder protocol not supported: " + protocol);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Response.Clear();
+                        Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                        await Response.WriteAsync("<h1>500 Internal Server Error</h1>");
+                        await Response.WriteAsync("<p>" + ex.ToString() + "</p>");
                     }
                 }
                 else
