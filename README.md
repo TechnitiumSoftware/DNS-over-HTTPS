@@ -7,5 +7,5 @@ This project allows hosting a DoH web service using ASP.NET or ASP.NETCore that 
 This can be combined with Technitium DNS Server to provide DoH protocol support.
 
 Download Binaries:
-- [DoH ASP.NET Web App](https://technitium.com/doh/DoH-aspnet.zip) (639 KB)
-- [DoH ASP.NETCore Web App](https://technitium.com/doh/DoH-aspnetcore.zip) (124 KB)
+- [DoH ASP.NET Web App](https://technitium.com/download/doh/DoH-aspnet.zip) (639 KB)
+- [DoH ASP.NETCore Web App](https://technitium.com/download/doh/DoH-aspnetcore.zip) (124 KB)
