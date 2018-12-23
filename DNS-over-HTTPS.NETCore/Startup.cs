@@ -62,19 +62,19 @@ namespace DNS_over_HTTPS.NETCore
 
                     try
                     {
-                        DnsDatagram dnsRequest;
+                        DnsDatagram request;
 
                         switch (Request.Method)
                         {
                             case "GET":
-                                dnsRequest = new DnsDatagram(new MemoryStream(Convert.FromBase64String(Request.Query["dns"])));
+                                request = new DnsDatagram(new MemoryStream(Convert.FromBase64String(Request.Query["dns"])));
                                 break;
 
                             case "POST":
                                 if (Request.ContentType != "application/dns-message")
                                     throw new NotSupportedException("DNS request type not supported: " + Request.ContentType);
 
-                                dnsRequest = new DnsDatagram(Request.Body);
+                                request = new DnsDatagram(Request.Body);
                                 break;
 
                             default:
@@ -84,7 +84,9 @@ namespace DNS_over_HTTPS.NETCore
                         DnsClientConnection connection = DnsClientConnection.GetConnection((DnsClientProtocol)Enum.Parse(typeof(DnsClientProtocol), Configuration.GetValue<string>("DnsServerProtocol"), true), _dnsServer, null);
                         connection.Timeout = Configuration.GetValue<int>("DnsTimeout");
 
-                        DnsDatagram response = connection.Query(dnsRequest);
+                        ushort originalRequestId = request.Header.Identifier;
+
+                        DnsDatagram response = connection.Query(request);
                         if (response == null)
                         {
                             Response.StatusCode = (int)HttpStatusCode.GatewayTimeout;
@@ -92,6 +94,8 @@ namespace DNS_over_HTTPS.NETCore
                         }
                         else
                         {
+                            response.Header.SetIdentifier(originalRequestId); //set id since dns connection may change it if 2 clients have same id
+
                             Response.ContentType = "application/dns-message";
 
                             using (MemoryStream mS = new MemoryStream())

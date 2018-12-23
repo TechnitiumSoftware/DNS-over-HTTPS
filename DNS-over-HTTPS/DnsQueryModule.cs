@@ -69,6 +69,8 @@ namespace DNS_over_HTTPS
                         DnsClientConnection connection = DnsClientConnection.GetConnection((DnsClientProtocol)Enum.Parse(typeof(DnsClientProtocol), Properties.Settings.Default.DnsServerProtocol, true), _dnsServer, null);
                         connection.Timeout = Properties.Settings.Default.DnsTimeout;
 
+                        ushort originalRequestId = request.Header.Identifier;
+
                         DnsDatagram response = connection.Query(request);
                         if (response == null)
                         {
@@ -77,6 +79,8 @@ namespace DNS_over_HTTPS
                         }
                         else
                         {
+                            response.Header.SetIdentifier(originalRequestId); //set id since dns connection may change it if 2 clients have same id
+
                             Response.ContentType = "application/dns-message";
 
                             using (MemoryStream mS = new MemoryStream())
