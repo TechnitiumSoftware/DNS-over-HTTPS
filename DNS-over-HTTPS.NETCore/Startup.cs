@@ -67,7 +67,20 @@ namespace DNS_over_HTTPS.NETCore
                         switch (Request.Method)
                         {
                             case "GET":
-                                request = new DnsDatagram(new MemoryStream(Convert.FromBase64String(Request.Query["dns"])));
+                                string strRequest = Request.Query["dns"];
+                                if (string.IsNullOrEmpty(strRequest))
+                                    throw new ArgumentNullException("dns");
+
+                                //convert from base64url to base64
+                                strRequest = strRequest.Replace('-', '+');
+                                strRequest = strRequest.Replace('_', '/');
+
+                                //add padding
+                                int x = strRequest.Length % 4;
+                                if (x > 0)
+                                    strRequest = strRequest.PadRight(strRequest.Length - x + 4, '=');
+
+                                request = new DnsDatagram(new MemoryStream(Convert.FromBase64String(strRequest)));
                                 break;
 
                             case "POST":
