@@ -79,7 +79,7 @@ namespace DNS_over_HTTPS
                                 throw new NotSupportedException("DoH request type not supported."); ;
                         }
 
-                        DnsClientConnection connection = DnsClientConnection.GetConnection((DnsClientProtocol)Enum.Parse(typeof(DnsClientProtocol), Properties.Settings.Default.DnsServerProtocol, true), _dnsServer, null);
+                        DnsClientConnection connection = DnsClientConnection.GetConnection((DnsTransportProtocol)Enum.Parse(typeof(DnsTransportProtocol), Properties.Settings.Default.DnsServerProtocol, true), _dnsServer, null);
                         connection.Timeout = Properties.Settings.Default.DnsTimeout;
 
                         ushort originalRequestId = request.Header.Identifier;
