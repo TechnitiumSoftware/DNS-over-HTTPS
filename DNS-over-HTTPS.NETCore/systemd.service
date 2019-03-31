@@ -1,4 +1,4 @@
-﻿[Unit]
+[Unit]
 Description=Technitium DNS-over-HTTPS Web Application
 
 [Service]
