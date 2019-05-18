@@ -9,8 +9,8 @@
     <PackageLicenseUrl>https://github.com/TechnitiumSoftware/DNS-over-HTTPS/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/TechnitiumSoftware/DNS-over-HTTPS</PackageProjectUrl>
     <Version>2.2</Version>
-    <AssemblyVersion>2.2.0.1</AssemblyVersion>
-    <FileVersion>2.2.0.1</FileVersion>
+    <AssemblyVersion>2.2.0.2</AssemblyVersion>
+    <FileVersion>2.2.0.2</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
