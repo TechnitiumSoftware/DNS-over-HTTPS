@@ -1,6 +1,6 @@
 ﻿/*
 Technitium DNS-over-HTTPS
-Copyright (C) 2019  Shreyas Zare (shreyas@technitium.com)
+Copyright (C) 2020  Shreyas Zare (shreyas@technitium.com)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using System;
 using System.IO;
 using System.Net;
@@ -43,7 +44,7 @@ namespace DNS_over_HTTPS.NETCore
             _dnsServer = new NameServerAddress(Configuration.GetValue<string>("DnsServer"));
         }
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -100,7 +101,7 @@ namespace DNS_over_HTTPS.NETCore
                             DnsClientConnection connection = DnsClientConnection.GetConnection((DnsTransportProtocol)Enum.Parse(typeof(DnsTransportProtocol), Configuration.GetValue<string>("DnsServerProtocol"), true), _dnsServer, null);
                             connection.Timeout = Configuration.GetValue<int>("DnsTimeout");
 
-                            ushort originalRequestId = request.Header.Identifier;
+                            ushort originalRequestId = request.Identifier;
 
                             DnsDatagram response = connection.Query(request);
                             if (response == null)
@@ -110,7 +111,7 @@ namespace DNS_over_HTTPS.NETCore
                             }
                             else
                             {
-                                response.Header.SetIdentifier(originalRequestId); //set id since dns connection may change it if 2 clients have same id
+                                response.SetIdentifier(originalRequestId); //set id since dns connection may change it if 2 clients have same id
 
                                 Response.ContentType = "application/dns-message";
 

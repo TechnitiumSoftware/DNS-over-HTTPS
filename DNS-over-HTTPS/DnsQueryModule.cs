@@ -1,6 +1,6 @@
 ﻿/*
 Technitium DNS-over-HTTPS
-Copyright (C) 2019  Shreyas Zare (shreyas@technitium.com)
+Copyright (C) 2020  Shreyas Zare (shreyas@technitium.com)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -82,7 +82,7 @@ namespace DNS_over_HTTPS
                         DnsClientConnection connection = DnsClientConnection.GetConnection((DnsTransportProtocol)Enum.Parse(typeof(DnsTransportProtocol), Properties.Settings.Default.DnsServerProtocol, true), _dnsServer, null);
                         connection.Timeout = Properties.Settings.Default.DnsTimeout;
 
-                        ushort originalRequestId = request.Header.Identifier;
+                        ushort originalRequestId = request.Identifier;
 
                         DnsDatagram response = connection.Query(request);
                         if (response == null)
@@ -92,7 +92,7 @@ namespace DNS_over_HTTPS
                         }
                         else
                         {
-                            response.Header.SetIdentifier(originalRequestId); //set id since dns connection may change it if 2 clients have same id
+                            response.SetIdentifier(originalRequestId); //set id since dns connection may change it if 2 clients have same id
 
                             Response.ContentType = "application/dns-message";
 
