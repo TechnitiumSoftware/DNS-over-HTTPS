@@ -2,7 +2,7 @@
 An implementation of RFC 8484 - DNS Queries over HTTPS (DoH). Host your own DoH web service using ASP.NET or ASP.NET Core that can transform any DNS server to be accessible via the DoH standard protocol.
 
 # System Requirements
-- Requires [.NET Core v2.2](https://dotnet.microsoft.com/download) installed.
+- Requires [.NET Core v3.1](https://dotnet.microsoft.com/download) installed.
 - Windows, Linux and macOS supported.
 
 # Download
