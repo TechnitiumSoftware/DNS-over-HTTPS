@@ -6,11 +6,11 @@
     <Company>Technitium</Company>
     <Description>An implementation of RFC 8484 - DNS Queries over HTTPS (DoH).</Description>
     <RepositoryUrl>https://github.com/TechnitiumSoftware/DNS-over-HTTPS</RepositoryUrl>
-    <PackageLicenseUrl>https://github.com/TechnitiumSoftware/DNS-over-HTTPS/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageLicenseUrl></PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/TechnitiumSoftware/DNS-over-HTTPS</PackageProjectUrl>
-    <Version>2.3</Version>
-    <AssemblyVersion>2.3.0.0</AssemblyVersion>
-    <FileVersion>2.3.0.0</FileVersion>
+    <Version>2.4</Version>
+    <AssemblyVersion>2.4.0.0</AssemblyVersion>
+    <FileVersion>2.4.0.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
