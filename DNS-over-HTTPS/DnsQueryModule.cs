@@ -79,27 +79,27 @@ namespace DNS_over_HTTPS
                                 throw new NotSupportedException("DoH request type not supported."); ;
                         }
 
-                        DnsClientConnection connection = DnsClientConnection.GetConnection((DnsTransportProtocol)Enum.Parse(typeof(DnsTransportProtocol), Properties.Settings.Default.DnsServerProtocol, true), _dnsServer, null);
-                        connection.Timeout = Properties.Settings.Default.DnsTimeout;
-
-                        ushort originalRequestId = request.Identifier;
-
-                        DnsDatagram response = connection.Query(request);
-                        if (response == null)
+                        using (DnsClientConnection connection = DnsClientConnection.GetConnection((DnsTransportProtocol)Enum.Parse(typeof(DnsTransportProtocol), Properties.Settings.Default.DnsServerProtocol, true), _dnsServer, null))
                         {
-                            Response.StatusCode = (int)HttpStatusCode.GatewayTimeout;
-                            Response.Write("<p>DNS query timed out.</p>");
-                        }
-                        else
-                        {
-                            response.SetIdentifier(originalRequestId); //set id since dns connection may change it if 2 clients have same id
+                            ushort originalRequestId = request.Identifier;
 
-                            Response.ContentType = "application/dns-message";
-
-                            using (MemoryStream mS = new MemoryStream())
+                            DnsDatagram response = connection.Query(request, Properties.Settings.Default.DnsTimeout);
+                            if (response == null)
                             {
-                                response.WriteTo(mS);
-                                mS.WriteTo(Response.OutputStream);
+                                Response.StatusCode = (int)HttpStatusCode.GatewayTimeout;
+                                Response.Write("<p>DNS query timed out.</p>");
+                            }
+                            else
+                            {
+                                response.SetIdentifier(originalRequestId); //set id since dns connection may change it if 2 clients have same id
+
+                                Response.ContentType = "application/dns-message";
+
+                                using (MemoryStream mS = new MemoryStream())
+                                {
+                                    response.WriteTo(mS, false);
+                                    mS.WriteTo(Response.OutputStream);
+                                }
                             }
                         }
                     }

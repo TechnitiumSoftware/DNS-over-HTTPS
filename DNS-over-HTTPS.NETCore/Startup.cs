@@ -98,27 +98,27 @@ namespace DNS_over_HTTPS.NETCore
                                     throw new NotSupportedException("DoH request type not supported."); ;
                             }
 
-                            DnsClientConnection connection = DnsClientConnection.GetConnection((DnsTransportProtocol)Enum.Parse(typeof(DnsTransportProtocol), Configuration.GetValue<string>("DnsServerProtocol"), true), _dnsServer, null);
-                            connection.Timeout = Configuration.GetValue<int>("DnsTimeout");
-
-                            ushort originalRequestId = request.Identifier;
-
-                            DnsDatagram response = connection.Query(request);
-                            if (response == null)
+                            using (DnsClientConnection connection = DnsClientConnection.GetConnection((DnsTransportProtocol)Enum.Parse(typeof(DnsTransportProtocol), Configuration.GetValue<string>("DnsServerProtocol"), true), _dnsServer, null))
                             {
-                                Response.StatusCode = (int)HttpStatusCode.GatewayTimeout;
-                                Response.WriteAsync("<p>DNS query timed out.</p>");
-                            }
-                            else
-                            {
-                                response.SetIdentifier(originalRequestId); //set id since dns connection may change it if 2 clients have same id
+                                ushort originalRequestId = request.Identifier;
 
-                                Response.ContentType = "application/dns-message";
-
-                                using (MemoryStream mS = new MemoryStream())
+                                DnsDatagram response = connection.Query(request, Configuration.GetValue<int>("DnsTimeout"));
+                                if (response == null)
                                 {
-                                    response.WriteTo(mS);
-                                    mS.WriteTo(Response.Body);
+                                    Response.StatusCode = (int)HttpStatusCode.GatewayTimeout;
+                                    Response.WriteAsync("<p>DNS query timed out.</p>");
+                                }
+                                else
+                                {
+                                    response.SetIdentifier(originalRequestId); //set id since dns connection may change it if 2 clients have same id
+
+                                    Response.ContentType = "application/dns-message";
+
+                                    using (MemoryStream mS = new MemoryStream())
+                                    {
+                                        response.WriteTo(mS, false);
+                                        mS.WriteTo(Response.Body);
+                                    }
                                 }
                             }
                         }
