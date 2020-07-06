@@ -72,7 +72,14 @@ namespace DNS_over_HTTPS
                                 if (Request.ContentType != "application/dns-message")
                                     throw new NotSupportedException("DNS request type not supported: " + Request.ContentType);
 
-                                request = new DnsDatagram(Request.InputStream);
+                                using (MemoryStream mS = new MemoryStream())
+                                {
+                                    Request.InputStream.CopyTo(mS);
+
+                                    mS.Position = 0;
+                                    request = new DnsDatagram(mS, false);
+                                }
+
                                 break;
 
                             default:
