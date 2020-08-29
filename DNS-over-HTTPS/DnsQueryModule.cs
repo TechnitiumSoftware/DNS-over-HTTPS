@@ -21,6 +21,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Threading;
 using System.Web;
 using TechnitiumLibrary.Net.Dns;
 using TechnitiumLibrary.Net.Dns.ClientConnection;
@@ -33,9 +34,10 @@ namespace DNS_over_HTTPS
 
         public void Init(HttpApplication context)
         {
-            _dnsServer = new NameServerAddress(Properties.Settings.Default.DnsServer);
+            DnsTransportProtocol protocol = (DnsTransportProtocol)Enum.Parse(typeof(DnsTransportProtocol), Properties.Settings.Default.DnsServerProtocol, true);
+            _dnsServer = new NameServerAddress(Properties.Settings.Default.DnsServer, protocol);
 
-            context.BeginRequest += delegate (object sender, EventArgs e)
+            context.BeginRequest += async delegate (object sender, EventArgs e)
             {
                 HttpRequest Request = context.Request;
                 HttpResponse Response = context.Response;
@@ -65,7 +67,7 @@ namespace DNS_over_HTTPS
                                 if (x > 0)
                                     strRequest = strRequest.PadRight(strRequest.Length - x + 4, '=');
 
-                                request = new DnsDatagram(new MemoryStream(Convert.FromBase64String(strRequest)));
+                                request = DnsDatagram.ReadFromUdp(new MemoryStream(Convert.FromBase64String(strRequest)));
                                 break;
 
                             case "POST":
@@ -77,7 +79,7 @@ namespace DNS_over_HTTPS
                                     Request.InputStream.CopyTo(mS);
 
                                     mS.Position = 0;
-                                    request = new DnsDatagram(mS, false);
+                                    request = DnsDatagram.ReadFromUdp(mS);
                                 }
 
                                 break;
@@ -86,11 +88,11 @@ namespace DNS_over_HTTPS
                                 throw new NotSupportedException("DoH request type not supported."); ;
                         }
 
-                        using (DnsClientConnection connection = DnsClientConnection.GetConnection((DnsTransportProtocol)Enum.Parse(typeof(DnsTransportProtocol), Properties.Settings.Default.DnsServerProtocol, true), _dnsServer, null))
+                        using (DnsClientConnection connection = DnsClientConnection.GetConnection(_dnsServer, null))
                         {
                             ushort originalRequestId = request.Identifier;
 
-                            DnsDatagram response = connection.Query(request, Properties.Settings.Default.DnsTimeout);
+                            DnsDatagram response = await connection.QueryAsync(request, Properties.Settings.Default.DnsTimeout, 0, CancellationToken.None);
                             if (response == null)
                             {
                                 Response.StatusCode = (int)HttpStatusCode.GatewayTimeout;
@@ -104,7 +106,7 @@ namespace DNS_over_HTTPS
 
                                 using (MemoryStream mS = new MemoryStream())
                                 {
-                                    response.WriteTo(mS, false);
+                                    response.WriteToUdp(mS);
                                     mS.WriteTo(Response.OutputStream);
                                 }
                             }
