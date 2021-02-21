@@ -3,7 +3,7 @@ Description=Technitium DNS-over-HTTPS Web Application
 
 [Service]
 WorkingDirectory=/var/aspnetcore/doh
-ExecStart=/usr/bin/dotnet /var/aspnetcore/doh/DNS-over-HTTPS.NETCore.dll --server.urls http://localhost:8053/
+ExecStart=/usr/bin/dotnet /var/aspnetcore/doh/DNS-over-HTTPS.dll --server.urls http://localhost:8053/
 Restart=always
 # Restart service after 10 seconds if the dotnet service crashes:
 RestartSec=10

@@ -1,6 +1,6 @@
 ﻿/*
 Technitium DNS-over-HTTPS
-Copyright (C) 2020  Shreyas Zare (shreyas@technitium.com)
+Copyright (C) 2021  Shreyas Zare (shreyas@technitium.com)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -35,6 +35,7 @@ namespace DNS_over_HTTPS.NETCore
     {
         static NameServerAddress _dnsServer;
         static int _timeout;
+        static bool _debug;
 
         public IConfiguration Configuration { get; set; }
 
@@ -42,9 +43,10 @@ namespace DNS_over_HTTPS.NETCore
         {
             Configuration = configuration;
 
-            DnsTransportProtocol protocol = (DnsTransportProtocol)Enum.Parse(typeof(DnsTransportProtocol), Configuration.GetValue<string>("DnsServerProtocol"), true);
-            _dnsServer = new NameServerAddress(Configuration.GetValue<string>("DnsServer"), protocol);
-            _timeout = Configuration.GetValue<int>("DnsTimeout");
+            DnsTransportProtocol protocol = (DnsTransportProtocol)Enum.Parse(typeof(DnsTransportProtocol), Configuration.GetValue<string>("dnsServerProtocol"), true);
+            _dnsServer = new NameServerAddress(Configuration.GetValue<string>("dnsServer"), protocol);
+            _timeout = Configuration.GetValue<int>("dnsTimeout");
+            _debug = Configuration.GetValue<bool>("debug");
         }
 
         public void Configure(IApplicationBuilder app, IHostEnvironment env)
@@ -61,12 +63,12 @@ namespace DNS_over_HTTPS.NETCore
 
                 if (Request.Path == "/dns-query")
                 {
-                    string acceptTypes = Request.Headers["accept"];
-                    if ((acceptTypes != null) && !acceptTypes.Contains("application/dns-message"))
-                        throw new NotSupportedException("DoH request type not supported.");
-
                     try
                     {
+                        string acceptTypes = Request.Headers["accept"];
+                        if ((acceptTypes != null) && !acceptTypes.Contains("application/dns-message"))
+                            throw new NotSupportedException("DoH request type not supported.");
+
                         DnsDatagram request;
 
                         switch (Request.Method)
@@ -94,7 +96,7 @@ namespace DNS_over_HTTPS.NETCore
 
                                 using (MemoryStream mS = new MemoryStream())
                                 {
-                                    Request.Body.CopyTo(mS);
+                                    await Request.Body.CopyToAsync(mS);
 
                                     mS.Position = 0;
                                     request = DnsDatagram.ReadFromUdp(mS);
@@ -110,7 +112,7 @@ namespace DNS_over_HTTPS.NETCore
                         {
                             ushort originalRequestId = request.Identifier;
 
-                            DnsDatagram response = await connection.QueryAsync(request, _timeout, 0, CancellationToken.None);
+                            DnsDatagram response = await connection.QueryAsync(request, _timeout, 1, CancellationToken.None);
                             if (response == null)
                             {
                                 Response.StatusCode = (int)HttpStatusCode.GatewayTimeout;
@@ -125,7 +127,9 @@ namespace DNS_over_HTTPS.NETCore
                                 using (MemoryStream mS = new MemoryStream())
                                 {
                                     response.WriteToUdp(mS);
-                                    mS.WriteTo(Response.Body);
+
+                                    mS.Position = 0;
+                                    await mS.CopyToAsync(Response.Body);
                                 }
                             }
                         }
@@ -135,7 +139,9 @@ namespace DNS_over_HTTPS.NETCore
                         Response.Clear();
                         Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                         await Response.WriteAsync("<h1>500 Internal Server Error</h1>");
-                        await Response.WriteAsync("<p>" + ex.ToString() + "</p>");
+
+                        if (_debug)
+                            await Response.WriteAsync("<p>" + ex.ToString() + "</p>");
                     }
                 }
                 else
