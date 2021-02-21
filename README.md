@@ -37,6 +37,11 @@ sudo systemctl enable doh
 sudo systemctl start doh
 ```
 
+4. Make sure that the DoH daemon is running without issues by running:
+```
+journalctl --unit doh --follow
+```
+
 Note: You can also run `dotnet DNS-over-HTTPS.dll` command to directly run the DoH console app.
 
 The DoH service is available on the `/dns-query` location on the web site that you are running. If you are running it directly as a console app then your DoH end point URL will be `http://localhost:5000/dns-query`. For Linux systemd daemon, the DoH end point will be `http://localhost:8053/dns-query` as per the argument provided in the systemd.service file.
