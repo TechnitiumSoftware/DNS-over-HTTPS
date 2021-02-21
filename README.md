@@ -12,8 +12,9 @@ An implementation of RFC 8484 - DNS Queries over HTTPS (DoH). Host your own DoH 
 - **Windows**:
 1. Download the `doh-aspnetcore.zip` zip file.
 2. Edit the `appsettings.json` file in notepad to set the DNS server of your choice.
-3. Run the `DNS-over-HTTPS.exe` on Windows or run `dotnet DNS-over-HTTPS.dll` on Linux, to directly run the DoH console app with built in web server. Use the displayed URL on the app.
-4. Install the DoH app on Windows IIS web server by creating a new website and extracting the `doh-aspnetcore.zip` zip file into the wwwroot folder of the website.
+3. Install the DoH app on Windows IIS web server by creating a new website and extracting the `doh-aspnetcore.zip` zip file into the wwwroot folder of the website.
+
+Note: You can also run the `DNS-over-HTTPS.exe` to directly run the DoH console app with built in web server.
 
 - **Linux**:
 1. Download and extract `doh-aspnetcore.zip` zip file to `/var/aspnetcore/doh`
@@ -36,7 +37,9 @@ sudo systemctl enable doh
 sudo systemctl start doh
 ```
 
-Note: The DoH service is available on the `/dns-query` location on the web site that you are running. If you are running it directly as a console app then your DoH end point URL will be `http://localhost:5000/dns-query`. For Linux systemd daemon, the DoH end point will be `http://localhost:8053/dns-query` as per the argument provided in the systemd.service file.
+Note: You can also run `dotnet DNS-over-HTTPS.dll` command to directly run the DoH console app.
+
+The DoH service is available on the `/dns-query` location on the web site that you are running. If you are running it directly as a console app then your DoH end point URL will be `http://localhost:5000/dns-query`. For Linux systemd daemon, the DoH end point will be `http://localhost:8053/dns-query` as per the argument provided in the systemd.service file.
 
 # Blog Posts
 [Configuring DNS-over-TLS and DNS-over-HTTPS with any DNS Server](https://blog.technitium.com/2018/12/configuring-dns-over-tls-and-dns-over.html)
