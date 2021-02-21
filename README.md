@@ -13,8 +13,9 @@ An implementation of RFC 8484 - DNS Queries over HTTPS (DoH). Host your own DoH 
 1. Download the `doh-aspnetcore.zip` zip file.
 2. Edit the `appsettings.json` file in notepad to set the DNS server of your choice.
 3. Install the DoH app on Windows IIS web server by creating a new website and extracting the `doh-aspnetcore.zip` zip file into the wwwroot folder of the website.
+4. Configure SSL certificate on IIS for the website so that the service works over HTTPS.
 
-Note: You can also run the `DNS-over-HTTPS.exe` to directly run the DoH console app with built in web server.
+Note: You can also run the `DNS-over-HTTPS.exe` to directly run the DoH console app with built in web server for quick testing.
 
 - **Linux**:
 1. Download and extract `doh-aspnetcore.zip` zip file to `/var/aspnetcore/doh`
@@ -42,7 +43,32 @@ sudo systemctl start doh
 journalctl --unit doh --follow
 ```
 
-Note: You can also run `dotnet DNS-over-HTTPS.dll` command to directly run the DoH console app.
+5. Configure a reverse proxy using a web server like nginx that does the SSL termination for the DoH service. Install the nginx web server using:
+```
+sudo apt-get -y install nginx
+```
+
+Create a config file for your domain name at `/etc/nginx/sites-enabled/doh.example.com` with the config shown below. Save the certificate and key files to path given as in the config. 
+```
+server {
+    listen 443 ssl;
+    server_name doh.example.com;
+
+    ssl_certificate /etc/nginx/ssl/doh-server.crt;
+    ssl_certificate_key /etc/nginx/ssl/doh-server.key;
+
+    location / {
+        proxy_pass http://127.0.0.1:8053;
+    }
+}
+```
+
+Reload nginx web server to finish the configuration.
+```
+sudo service nginx reload
+```
+
+Note: You can also run `dotnet DNS-over-HTTPS.dll` command to directly run the DoH console app for quick testing.
 
 The DoH service is available on the `/dns-query` location on the web site that you are running. If you are running it directly as a console app then your DoH end point URL will be `http://localhost:5000/dns-query`. For Linux systemd daemon, the DoH end point will be `http://localhost:8053/dns-query` as per the argument provided in the systemd.service file.
 
