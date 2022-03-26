@@ -1,6 +1,6 @@
 ﻿/*
 Technitium DNS-over-HTTPS
-Copyright (C) 2021  Shreyas Zare (shreyas@technitium.com)
+Copyright (C) 2022  Shreyas Zare (shreyas@technitium.com)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ using System.Threading;
 using TechnitiumLibrary.Net.Dns;
 using TechnitiumLibrary.Net.Dns.ClientConnection;
 
-namespace DNS_over_HTTPS.NETCore
+namespace DNS_over_HTTPS
 {
     public class Startup
     {
@@ -87,7 +87,7 @@ namespace DNS_over_HTTPS.NETCore
                                 if (x > 0)
                                     strRequest = strRequest.PadRight(strRequest.Length - x + 4, '=');
 
-                                request = DnsDatagram.ReadFromUdp(new MemoryStream(Convert.FromBase64String(strRequest)));
+                                request = DnsDatagram.ReadFrom(new MemoryStream(Convert.FromBase64String(strRequest)));
                                 break;
 
                             case "POST":
@@ -99,7 +99,7 @@ namespace DNS_over_HTTPS.NETCore
                                     await Request.Body.CopyToAsync(mS);
 
                                     mS.Position = 0;
-                                    request = DnsDatagram.ReadFromUdp(mS);
+                                    request = DnsDatagram.ReadFrom(mS);
                                 }
 
                                 break;
@@ -126,7 +126,7 @@ namespace DNS_over_HTTPS.NETCore
 
                                 using (MemoryStream mS = new MemoryStream())
                                 {
-                                    response.WriteToUdp(mS);
+                                    response.WriteTo(mS);
 
                                     mS.Position = 0;
                                     await mS.CopyToAsync(Response.Body);
