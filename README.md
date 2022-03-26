@@ -1,12 +1,12 @@
 # DNS-over-HTTPS
-An implementation of RFC 8484 - DNS Queries over HTTPS (DoH). Host your own DoH web service using ASP.NET 5 that can transform any DNS server to be accessible via the DoH standard protocol.
+An implementation of RFC 8484 - DNS Queries over HTTPS (DoH). Host your own DoH web service using ASP.NET 6 Runtime that can transform any DNS server to be accessible via the DoH standard protocol.
 
 # System Requirements
-- Requires [.NET 5](https://dotnet.microsoft.com/download) installed. Install [Hosting Bundle](https://dotnet.microsoft.com/download/dotnet/5.0) for running on Microsoft IIS web server.
+- Requires [.NET 6](https://dotnet.microsoft.com/download) installed. Install [Hosting Bundle](https://dotnet.microsoft.com/en-us/download/dotnet/6.0) for running on Microsoft IIS web server.
 - Windows, Linux and macOS supported.
 
 # Download
-- **Cross-Platform**: [DoH ASP.NET 5 Web App](https://download.technitium.com/doh/doh-aspnetcore.zip)
+- **Cross-Platform**: [doh-aspnetcore.zip](https://download.technitium.com/doh/doh-aspnetcore.zip)
 
 # Install Instructions
 - **Windows**:
