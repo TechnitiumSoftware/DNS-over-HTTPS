@@ -22,7 +22,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using System.IO;
 
-namespace DNS_over_HTTPS.NETCore
+namespace DNS_over_HTTPS
 {
     public class Program
     {
