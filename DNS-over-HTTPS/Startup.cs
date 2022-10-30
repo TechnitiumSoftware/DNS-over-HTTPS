@@ -25,10 +25,7 @@ using Microsoft.Extensions.Hosting;
 using System;
 using System.IO;
 using System.Net;
-using System.Threading;
-using System.Threading.Tasks;
 using TechnitiumLibrary.Net.Dns;
-using TechnitiumLibrary.Net.Dns.ClientConnection;
 
 namespace DNS_over_HTTPS
 {
@@ -123,61 +120,22 @@ namespace DNS_over_HTTPS
                                 throw new NotSupportedException("DoH request type not supported.");
                         }
 
-                        ushort originalRequestId = request.Identifier;
+                        DnsClient dnsClient = new DnsClient(_dnsServers);
 
-                        DnsDatagram response;
+                        dnsClient.Timeout = _timeout;
+                        dnsClient.Retries = _retries;
+                        dnsClient.Concurrency = _dnsServers.Length;
 
-                        if (_dnsServers.Length > 1)
+                        DnsDatagram response = await dnsClient.ResolveAsync(request);
+
+                        Response.ContentType = "application/dns-message";
+
+                        using (MemoryStream mS = new MemoryStream())
                         {
-                            using (CancellationTokenSource cancellationTokenSource = new CancellationTokenSource())
-                            {
-                                Task<DnsDatagram>[] tasks = new Task<DnsDatagram>[_dnsServers.Length];
+                            response.WriteTo(mS);
 
-                                for (int i = 0; i < tasks.Length; i++)
-                                {
-                                    NameServerAddress dnsServer = _dnsServers[i];
-
-                                    tasks[i] = Task.Run(delegate ()
-                                    {
-                                        using (DnsClientConnection connection = DnsClientConnection.GetConnection(dnsServer, null))
-                                        {
-                                            return connection.QueryAsync(request, _timeout, _retries, cancellationTokenSource.Token);
-                                        }
-                                    });
-                                }
-
-                                Task<DnsDatagram> responseTask = await Task.WhenAny(tasks);
-                                cancellationTokenSource.Cancel(); //to stop the other resolver tasks
-
-                                response = await responseTask;
-                            }
-                        }
-                        else
-                        {
-                            using (DnsClientConnection connection = DnsClientConnection.GetConnection(_dnsServers[0], null))
-                            {
-                                response = await connection.QueryAsync(request, _timeout, _retries, CancellationToken.None);
-                            }
-                        }
-
-                        if (response is null)
-                        {
-                            Response.StatusCode = (int)HttpStatusCode.GatewayTimeout;
-                            await Response.WriteAsync("<p>DNS query timed out.</p>");
-                        }
-                        else
-                        {
-                            response.SetIdentifier(originalRequestId); //set id since dns connection may change it if 2 clients have same id
-
-                            Response.ContentType = "application/dns-message";
-
-                            using (MemoryStream mS = new MemoryStream())
-                            {
-                                response.WriteTo(mS);
-
-                                mS.Position = 0;
-                                await mS.CopyToAsync(Response.Body);
-                            }
+                            mS.Position = 0;
+                            await mS.CopyToAsync(Response.Body);
                         }
                     }
                     catch (Exception ex)
