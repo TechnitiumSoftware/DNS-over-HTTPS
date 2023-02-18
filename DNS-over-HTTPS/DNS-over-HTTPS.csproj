@@ -9,17 +9,13 @@
     <RepositoryUrl>https://github.com/TechnitiumSoftware/DNS-over-HTTPS</RepositoryUrl>
     <PackageLicenseUrl></PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/TechnitiumSoftware/DNS-over-HTTPS</PackageProjectUrl>
-    <Version>5.0.1</Version>
+    <Version>5.1</Version>
     <PackageId>DNS-over-HTTPS</PackageId>
     <Product>DNS-over-HTTPS</Product>
     <AssemblyName>DNS-over-HTTPS</AssemblyName>
     <RootNamespace>DNS-over-HTTPS</RootNamespace>
     <UserSecretsId>d5861cba-e623-4943-805c-7b3380ab7678</UserSecretsId>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
-  </ItemGroup>
 
   <ItemGroup>
     <Reference Include="TechnitiumLibrary.Net">
