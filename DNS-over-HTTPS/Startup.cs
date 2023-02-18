@@ -1,6 +1,6 @@
 ﻿/*
 Technitium DNS-over-HTTPS
-Copyright (C) 2022  Shreyas Zare (shreyas@technitium.com)
+Copyright (C) 2023  Shreyas Zare (shreyas@technitium.com)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ namespace DNS_over_HTTPS
 
             for (int i = 0; i < _dnsServers.Length; i++)
             {
-                _dnsServers[i] = new NameServerAddress(dnsServersList[i]);
+                _dnsServers[i] = NameServerAddress.Parse(dnsServersList[i]);
 
                 if (_dnsServers[i].Protocol != protocol)
                     _dnsServers[i] = _dnsServers[i].ChangeProtocol(protocol);
