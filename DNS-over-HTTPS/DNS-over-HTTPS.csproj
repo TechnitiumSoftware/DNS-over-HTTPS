@@ -9,7 +9,7 @@
     <RepositoryUrl>https://github.com/TechnitiumSoftware/DNS-over-HTTPS</RepositoryUrl>
     <PackageLicenseUrl></PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/TechnitiumSoftware/DNS-over-HTTPS</PackageProjectUrl>
-    <Version>5.1</Version>
+    <Version>5.1.1</Version>
     <PackageId>DNS-over-HTTPS</PackageId>
     <Product>DNS-over-HTTPS</Product>
     <AssemblyName>DNS-over-HTTPS</AssemblyName>
